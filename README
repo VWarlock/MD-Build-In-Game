@@ -31,7 +31,7 @@ ToDo:
   
 Pinout of the PLD (G16V8) as used on the PCB:  
   
-/* *************** INPUT PINS ******************** */    
+/* *************** INPUT PINS ******************** */  
 PIN  1 = DISKn;     /* /DISK (ExpPort B2)                                             */  
 PIN  2 = ROM_Mode2; /* high/open = 1 game     , low = 2 games                         */  
 PIN  3 = ROM_Mode4; /* high/open = 1/2 game(s), low = 4 games (beats ROM_Mode2)       */  
@@ -43,12 +43,12 @@ PIN  8 = AMSB0;     /* A19 (cart slot B7, addressbus counts from A1)            
 PIN  9 = AMSB1;     /* A20 (cart slot B8, addressbus counts from A1)                  */  
   
 /* *************** I/O PINS ******************** */  
-PIN 19 = BIG_Sel0;   /* bank switch LSB                                                  */  
-PIN 18 = BIG_Sel1;   /* bank switch MSB                                                  */  
-PIN 17 = ASIC_CARTn; /* /CART (from ASIC; cutted from cart slot B17 if TMSS Mod is used) */  
-PIN 16 = ROM_OEn;    /* /OE internal EEPROM (29F1610 Pin 14)                             */  
-PIN 15 = ROM_CEn;    /* /CE internal EEPROM (29F1610 Pin 12)                             */  
-PIN 14 = CART_OEn;   /* /OE cartridge (connect only if wire at cart slot B17 is cutted)  */  
-PIN 13 = ROM_AMSB0;  /* A18 internal EEPROM (29F1610 Pin  2)                             */  
-PIN 12 = ROM_AMSB1;  /* A19 internal EEPROM (29F1610 Pin 43)                             */  
-PIN 11 = TMSS_Modn;  /* high/open = enabled, low = disabled                              */  
+PIN 19 = BIG_Sel0;   /* bank switch LSB                                                   */  
+PIN 18 = BIG_Sel1;   /* bank switch MSB                                                   */  
+PIN 17 = ASIC_CARTn; /* /CART (from ASIC; cutted from cart slot B32)                      */  
+PIN 16 = ROM_OEn;    /* /OE internal EEPROM (29F1610 Pin 14)                              */  
+PIN 15 = ROM_CEn;    /* /CE internal EEPROM (29F1610 Pin 12)                              */  
+PIN 14 = CART_OEn;   /* /OE cartridge (cart slot B17; connect only if wire at B17 is cut) */  
+PIN 13 = ROM_AMSB0;  /* A18 internal EEPROM (29F1610 Pin  2)                              */  
+PIN 12 = ROM_AMSB1;  /* A19 internal EEPROM (29F1610 Pin 43)                              */  
+PIN 11 = TMSS_Modn;  /* high/open = enabled, low = disabled                               */  
