@@ -341,7 +341,7 @@ doreset
     clrf    reg_reset_cnt               ; if yes: reset the 2bit counter
     clrf    reg_reset_panalty           ; unset a potential panalty
     call    save_rst_cnt
-    goto    set_initial_mode            ; small trick ;)
+    goto    set_BIG_Sel                 ; small trick ;)
 
 ; --------calls--------
 setled
@@ -355,7 +355,7 @@ setled_green
     movfw   PORTC
     andlw   0x0f
     xorlw   code_led_green
-    btfsc	PORTC, LED_TYPE ; if common anode:
+    btfsc   PORTC, LED_TYPE ; if common anode:
     xorlw   code_led_invert ; invert output
     movwf   PORTC
     return
@@ -364,7 +364,7 @@ setled_red
     movfw   PORTC
     andlw   0x0f
     xorlw   code_led_red
-    btfsc	PORTC, LED_TYPE ; if common anode:
+    btfsc   PORTC, LED_TYPE ; if common anode:
     xorlw   code_led_invert ; invert output
     movwf   PORTC
     return
@@ -373,7 +373,7 @@ setled_yellow
     movfw   PORTC
     andlw   0x0f
     xorlw   code_led_yellow
-    btfsc	PORTC, LED_TYPE ; if common anode:
+    btfsc   PORTC, LED_TYPE ; if common anode:
     xorlw   code_led_invert ; invert output
     movwf   PORTC
     return
@@ -401,10 +401,10 @@ wait_save_mode_end
     return
 
 save_rst_cnt
-    movfw   reg_current_mode
+    movfw   reg_reset_cnt
     banksel EEADR             ; save to EEPROM
     movwf   EEDAT
-    M_movlf EEADR, 0x01       ; address
+    M_movlf 0x01, EEADR       ; address
     bsf     EECON1, WREN
     movlw   0x55
     movwf   EECON2
