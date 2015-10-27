@@ -26,12 +26,12 @@
 ;
 ;                         ,-----_-----.
 ;                     +5V |1        14| GND
-;       Reset Button (in) |2  A5 A0 13| BIG Sel0 (out)
-;        Reset Line (out) |3  A4 A1 12| BIG Sel1 (out)
-;              /RoLC (in) |4  A3 A2 11| Language   (out)
-;       (green) LED (out) |5  C5 C0 10| /Language   (out)
-;         (red) LED (out) |6  C4 C1  9| Videomode  (out)
-;           LED_TYPE (in) |7  C3 C2  8| /Videomode (out)
+;       Reset Button (in) |2  A5 A0 13| BIG Sel0   (out)
+;        Reset Line (out) |3  A4 A1 12| BIG Sel1   (out)
+;              /RoLC (in) |4  A3 A2 11|  Videomode (out)
+;       (green) LED (out) |5  C5 C0 10| /Videomode (out)
+;         (red) LED (out) |6  C4 C1  9|  Language  (out)
+;           LED_TYPE (in) |7  C3 C2  8| /Language  (out)
 ;                         `-----------'
 ;
 ; Special purposes for pins and other common notes:
@@ -50,14 +50,14 @@
 ;      low = RoLC on - pic resets console if language bit has to be changed
 ;     high = RoLC off
 ;
-;   Pin 9 (Videomode)    Pin 8 (/Videomode)
-;      low = 50Hz           low = 60Hz
-;     high = 60Hz          high = 50Hz
-;                          -> Opposite of Pin 9
-;
-;   Pin 11 (Language)    Pin 10 (/Language)
+;   Pin 9 (Language)     Pin 8 (/Language)
 ;      low = Japanese       low = English
 ;     high = English       high = Japanese
+;                          -> Opposite of Pin 9
+;
+;   Pin 11 (Videomode)   Pin 10 (/Videomode)
+;      low = 50Hz           low = 60Hz
+;     high = 60Hz          high = 50Hz
 ;                          -> Opposite of Pin 11
 ;
 ;   Pin 12 and Pin 13
@@ -70,16 +70,16 @@
 ;
 ; mode description:
 ;
-; mode 0x00 = PAL:           50Hz, LED green
-;
-; mode 0x01 = NTSC:          60Hz, LED red
-;
-; mode 0x02 = JAP NTSC:      60Hz, LED orange
+; mode 0x00 = PAL:           50Hz, LED green   (alternative: green)
+; mode 0x01 = NTSC:          60Hz, LED red     (alternative: orange)
+; mode 0x02 = JAP NTSC:      60Hz, LED orange  (alternative: red)
 ;      
 ; -----------------------------------------------------------------------
 ; Configuration bits: adapt to your setup and needs
 
     __CONFIG _INTRC_OSC_NOCLKOUT & _WDT_OFF & _PWRTE_OFF & _MCLRE_OFF & _CP_OFF & _CPD_OFF
+
+use_alternative_color_scheme set 0 ; 0 = normal, 1 = alternative
 
 ; -----------------------------------------------------------------------
 ; macros and definitions
@@ -150,22 +150,22 @@ M_release_reset macro
                 endm
 
 M_set50 macro
-        bcf PORTC, VIDMODE
+        bcf PORTA, VIDMODE
         bsf PORTC, NVIDMODE
         endm
 
 M_set60 macro
-        bsf PORTC, VIDMODE
+        bsf PORTA, VIDMODE
         bcf PORTC, NVIDMODE
         endm
 
 M_setEN macro
-        bsf PORTA, LANGUAGE
+        bsf PORTC, LANGUAGE
         bcf PORTC, NLANGUAGE
         endm
 
 M_setJA macro
-        bcf PORTA, LANGUAGE
+        bcf PORTC, LANGUAGE
         bsf PORTC, NLANGUAGE
         endm
 
@@ -187,15 +187,15 @@ M_skipnext_rst_notpressed   macro
 ;port a
 BIG_Sel0      EQU 0
 BIG_Sel1      EQU 1
-LANGUAGE      EQU 2
+VIDMODE       EQU 2
 NRoLC         EQU 3
 RESET_OUT     EQU 4
 RESET_BUTTON  EQU 5
 
 ;port c
-NLANGUAGE   EQU 0
-VIDMODE     EQU 1
-NVIDMODE    EQU 2
+NVIDMODE    EQU 0
+LANGUAGE    EQU 1
+NLANGUAGE   EQU 2
 LED_TYPE    EQU 3
 LED_RED     EQU 4
 LED_GREEN   EQU 5
@@ -212,22 +212,19 @@ reg_led_buffer      EQU 0x41
 reg_first_boot_done EQU 0x42
 
 ; codes and bits
-code_modereset      EQU 0x00
-code_pal            EQU 0x00
-code_ntsc           EQU 0x01
+code_ntsc           EQU 0x00
+code_pal            EQU 0x01
 code_jap            EQU 0x02
-
-default_mode    EQU code_ntsc
 
 mode_overflow       EQU 0x03
 bit_language        EQU 1
-bit_eng_hz          EQU 0
+bit_videomode       EQU 0
 
 
 code_led_off    EQU 0x00
 code_led_green  EQU (1<<LED_GREEN)
 code_led_red    EQU (1<<LED_RED)
-code_led_yellow EQU code_led_green ^ code_led_red
+code_led_orange EQU code_led_green ^ code_led_red
 
 code_led_invert EQU code_led_green ^ code_led_red
 
@@ -292,17 +289,17 @@ apply_mode
     call    save_mode
     ; other strategie than in set_initial_mode
     ; -> protection against an error in mode selection
-    M_belf  code_pal, reg_current_mode, set_new_pal
     M_belf  code_ntsc, reg_current_mode, set_new_ntsc
+    M_belf  code_pal, reg_current_mode, set_new_pal
     M_belf  code_jap, reg_current_mode, set_new_jap
     goto    set_previous_mode  ; should not appear
 
-set_new_pal
-    M_set50
-    goto    apply_mode_post_check
-
 set_new_ntsc
     M_set60
+    goto    apply_mode_post_check
+
+set_new_pal
+    M_set50
     goto    apply_mode_post_check
 
 set_new_jap
@@ -347,18 +344,16 @@ doreset
 setled
     ; same strategie as in set_initial_mode
     btfsc   reg_current_mode, bit_language
-    goto    setled_yellow
-    btfsc   reg_current_mode, bit_eng_hz
+  if use_alternative_color_scheme
     goto    setled_red
-
-setled_green
-    movfw   PORTC
-    andlw   0x0f
-    xorlw   code_led_green
-    btfsc   PORTC, LED_TYPE ; if common anode:
-    xorlw   code_led_invert ; invert output
-    movwf   PORTC
-    return
+  else
+    goto    setled_orange
+  endif
+    btfsc   reg_current_mode, bit_videomode
+    goto    setled_green
+  if use_alternative_color_scheme
+    goto    setled_orange
+  endif
 
 setled_red
     movfw   PORTC
@@ -369,17 +364,26 @@ setled_red
     movwf   PORTC
     return
 
-setled_yellow
+setled_green
     movfw   PORTC
     andlw   0x0f
-    xorlw   code_led_yellow
+    xorlw   code_led_green
+    btfsc   PORTC, LED_TYPE ; if common anode:
+    xorlw   code_led_invert ; invert output
+    movwf   PORTC
+    return
+
+setled_orange
+    movfw   PORTC
+    andlw   0x0f
+    xorlw   code_led_orange
     btfsc   PORTC, LED_TYPE ; if common anode:
     xorlw   code_led_invert ; invert output
     movwf   PORTC
     return
 
 reset_mode
-    M_movlf code_modereset, reg_current_mode
+    clrf    reg_current_mode
     return
 
 save_mode
@@ -496,19 +500,19 @@ set_initial_mode
     ;            -> if Eng, check 50/60Hz at first bit
     btfsc   reg_current_mode, bit_language
     goto    set_jap
-    btfsc   reg_current_mode, bit_eng_hz
-    goto    set_ntsc
-
-set_pal
-    M_set50
-    M_setEN
-    M_movlf code_pal, reg_current_mode  ; in case a non-valid mode is stored
-    goto    init_end
+    btfsc   reg_current_mode, bit_videomode
+    goto    set_pal
 
 set_ntsc
     M_set60
     M_setEN
     M_movlf code_ntsc, reg_current_mode ; in case a non-valid mode is stored
+    goto    init_end
+
+set_pal
+    M_set50
+    M_setEN
+    M_movlf code_pal, reg_current_mode  ; in case a non-valid mode is stored
     goto    init_end
 
 set_jap
@@ -536,7 +540,7 @@ detect_reset_type
 ; -----------------------------------------------------------------------
 ; eeprom data
 DEEPROM	CODE
-	de	default_mode, 0x00
+	de	code_ntsc, 0x00
 
 theend
     END
