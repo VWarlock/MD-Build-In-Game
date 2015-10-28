@@ -28,10 +28,10 @@
 ;                     +5V |1        14| GND
 ;       Reset Button (in) |2  A5 A0 13| BIG Sel0   (out)
 ;        Reset Line (out) |3  A4 A1 12| BIG Sel1   (out)
-;              /RoLC (in) |4  A3 A2 11|  Videomode (out)
-;       (green) LED (out) |5  C5 C0 10| /Videomode (out)
-;         (red) LED (out) |6  C4 C1  9|  Language  (out)
-;           LED_TYPE (in) |7  C3 C2  8| /Language  (out)
+;              /RoLC (in) |4  A3 A2 11|  Language  (out)
+;       (green) LED (out) |5  C5 C0 10| /Language  (out)
+;         (red) LED (out) |6  C4 C1  9|  Videomode (out)
+;           LED_TYPE (in) |7  C3 C2  8| /Videomode (out)
 ;                         `-----------'
 ;
 ; Special purposes for pins and other common notes:
@@ -50,14 +50,14 @@
 ;      low = RoLC on - pic resets console if language bit has to be changed
 ;     high = RoLC off
 ;
-;   Pin 9 (Language)     Pin 8 (/Language)
-;      low = Japanese       low = English
-;     high = English       high = Japanese
-;                          -> Opposite of Pin 9
-;
-;   Pin 11 (Videomode)   Pin 10 (/Videomode)
+;   Pin 9 (Videomode)    Pin 8 (/Videomode)
 ;      low = 50Hz           low = 60Hz
 ;     high = 60Hz          high = 50Hz
+;                          -> Opposite of Pin 9
+;
+;   Pin 11 (Language)    Pin 10 (/Language)
+;      low = Japanese       low = English
+;     high = English       high = Japanese
 ;                          -> Opposite of Pin 11
 ;
 ;   Pin 12 and Pin 13
@@ -150,22 +150,22 @@ M_release_reset macro
                 endm
 
 M_set50 macro
-        bcf PORTA, VIDMODE
+        bcf PORTC, VIDMODE
         bsf PORTC, NVIDMODE
         endm
 
 M_set60 macro
-        bsf PORTA, VIDMODE
+        bsf PORTC, VIDMODE
         bcf PORTC, NVIDMODE
         endm
 
 M_setEN macro
-        bsf PORTC, LANGUAGE
+        bsf PORTA, LANGUAGE
         bcf PORTC, NLANGUAGE
         endm
 
 M_setJA macro
-        bcf PORTC, LANGUAGE
+        bcf PORTA, LANGUAGE
         bsf PORTC, NLANGUAGE
         endm
 
@@ -187,15 +187,15 @@ M_skipnext_rst_notpressed   macro
 ;port a
 BIG_Sel0      EQU 0
 BIG_Sel1      EQU 1
-VIDMODE       EQU 2
+LANGUAGE      EQU 2
 NRoLC         EQU 3
 RESET_OUT     EQU 4
 RESET_BUTTON  EQU 5
 
 ;port c
-NVIDMODE    EQU 0
-LANGUAGE    EQU 1
-NLANGUAGE   EQU 2
+NLANGUAGE   EQU 0
+VIDMODE     EQU 1
+NVIDMODE    EQU 2
 LED_TYPE    EQU 3
 LED_RED     EQU 4
 LED_GREEN   EQU 5
@@ -248,9 +248,8 @@ repetitions_mode_delay  EQU 0x4a    ; around 740ms
 
  org    0x0005
 idle
-    M_skipnext_rst_notpressed
-    goto    check_rst
     bcf     INTCON, RAIF
+    M_skipnext_rst_pressed
     sleep
 
 check_rst
@@ -331,7 +330,6 @@ apply_mode_post_check
 doreset
     M_push_reset
     M_delay_x10ms   repetitions_300ms
-    M_movff reg_current_mode, reg_previous_mode
     btfss   reg_reset_panalty, 0        ; language bit has been changed?
     incf    reg_reset_cnt, 1            ; only if no: increase counter
     btfsc   reg_reset_cnt, 2            ; did reset counter exceed valid interval?
@@ -408,7 +406,7 @@ save_rst_cnt
     movfw   reg_reset_cnt
     banksel EEADR             ; save to EEPROM
     movwf   EEDAT
-    M_movlf 0x01, EEADR       ; address
+    M_movlf 0x01, EEADR       ; address 1
     bsf     EECON1, WREN
     movlw   0x55
     movwf   EECON2
@@ -478,16 +476,11 @@ load_mode
     clrf    EEADR               ; address 0
     bsf     EECON1, RD
     movfw   EEDAT
-;    banksel PORTA
     movwf   reg_current_mode    ; last mode saved
-    movwf   reg_previous_mode   ; last mode saved to compare
-;    bcf     STATUS, C           ; clear carry
-;    banksel EEADR               ; fetch current mode from EEPROM
     incf    EEADR, 1            ; address 1
     bsf     EECON1, RD
     movfw   EEDAT
     andlw   0x03
-;    banksel PORTA
     movwf   reg_reset_cnt
     banksel PORTA
 
@@ -495,9 +488,9 @@ set_BIG_Sel
     M_movff   reg_reset_cnt, PORTA   ; selects the build in game
 
 set_initial_mode
-    ; strategie: check language flag
-    ;            -> if Jap, set also 60Hz
-    ;            -> if Eng, check 50/60Hz at first bit
+    ; strategie: check language flag first as Jap-mode is always 60Hz
+    ;            -> check language  at bit 1 (1 = jap , 0 = us/eur)
+    ;            -> check videomode at bit 0 (1 = 50Hz, 0 = 60Hz  )
     btfsc   reg_current_mode, bit_language
     goto    set_jap
     btfsc   reg_current_mode, bit_videomode
