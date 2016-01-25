@@ -201,8 +201,7 @@ reg_overflow_cnt    EQU 0x20
 reg_repetition_cnt  EQU 0x21
 reg_current_mode    EQU 0x30
 reg_previous_mode   EQU 0x31
-reg_reset_cnt       EQU 0x32
-reg_reset_panalty   EQU 0x33
+reg_reset_panalty   EQU 0x32
 reg_reset_type      EQU 0x40
 reg_led_buffer      EQU 0x41
 reg_first_boot_done EQU 0x42
@@ -287,24 +286,27 @@ apply_mode ; save mode, set video mode and check if a reset is wanted
     bcf     PORTC, VIDMODE                  ; 50Hz
     btfss   reg_current_mode, bit_videomode
     bsf     PORTC, VIDMODE                  ; 60Hz
-    M_beff  reg_current_mode, reg_previous_mode, idle ; nothing has been changed -> return to idle
-    bsf     reg_reset_panalty, 0                      ; set panalty flag
-    btfss   PORTA, NRoMC                              ; auto-reset on mode change?
-    goto    idle                                      ; no: go back to idle 
-                                                      ; yes: perform a reset
+    ; check if current mode and previous mode are the same
+    movfw   reg_current_mode
+    xorwf   reg_previous_mode, w
+    andlw   0x03
+    btfsc   STATUS, Z
+    goto    idle                    ; nothing has been changed -> return to idle
+    bsf     reg_reset_panalty, 0    ; set panalty flag
+    btfss   PORTA, NRoMC            ; auto-reset on mode change?
+    goto    idle                    ; no: go back to idle
+                                    ; yes: perform a reset
 
 
 doreset
     M_push_reset
     M_delay_x10ms   repetitions_300ms
     movlw   0x10
-    btfss   reg_reset_panalty, 0        ; mode has been changed?
-    addwf   reg_reset_cnt, 1            ; only if no: increase counter
-    btfsc   reg_reset_cnt, 6            ; did reset counter exceed valid interval?
-    clrf    reg_reset_cnt               ; if yes: reset the 2bit counter
-    clrf    reg_reset_panalty           ; unset a potential panalty
-    call    save_rst_cnt
-    goto    set_BIG_Sel                 ; small trick ;)
+    btfss   reg_reset_panalty, 0  ; mode has been changed?
+    addwf   reg_current_mode, 1   ; only if no: increase counter
+    bcf     reg_current_mode, 6   ; keep the 2bit counter 2bits long
+    clrf    reg_reset_panalty     ; unset a potential panalty
+    goto    set_BIG_Sel           ; small trick ;)
 
 
 set_previous_mode
@@ -361,6 +363,7 @@ reset_mode
 
 save_mode
     movfw   reg_current_mode
+    andlw   0x33
     banksel EEADR             ; save to EEPROM
     movwf   EEDAT
     clrf    EEADR             ; address 0
@@ -376,25 +379,6 @@ wait_save_mode_end
     bcf     EECON1, WREN
     banksel PORTA
     return
-
-save_rst_cnt
-    movfw   reg_reset_cnt
-    banksel EEADR             ; save to EEPROM
-    movwf   EEDAT
-    M_movlf 0x01, EEADR       ; address 1
-    bsf     EECON1, WREN
-    movlw   0x55
-    movwf   EECON2
-    movlw   0xaa
-    movwf   EECON2
-    bsf     EECON1, WR
-wait_save_rst_cnt_end
-    btfsc   EECON1, WR
-    goto    wait_save_rst_cnt_end
-    bcf     EECON1, WREN
-    banksel PORTA
-    return
-    
 
 
 delay_10ms
@@ -445,22 +429,21 @@ start
 load_mode
     clrf    reg_first_boot_done
     clrf    reg_current_mode
-    clrf    reg_reset_cnt
     bcf     STATUS, C           ; clear carry
     banksel EEADR               ; fetch current mode from EEPROM
     clrf    EEADR               ; address 0
     bsf     EECON1, RD
     movfw   EEDAT
-    movwf   reg_current_mode    ; last mode saved
-    incf    EEADR, 1            ; address 1
-    bsf     EECON1, RD
-    movfw   EEDAT
-    andlw   0x30
-    movwf   reg_reset_cnt
     banksel PORTA
+    andlw   0x33
+    movwf   reg_current_mode    ; last mode saved
 
 set_BIG_Sel
-    M_movff   reg_reset_cnt, PORTA   ; selects the build in game
+    movfw   reg_current_mode
+    andlw   0x30
+    btfsc   PORTA, LANGUAGE
+    iorlw   0x01
+    movwf   PORTA ; selects the build in game
 
 set_initial_mode
     ; strategie: check language flag first as Jap-mode is always 60Hz
@@ -468,25 +451,27 @@ set_initial_mode
     ;            -> check videomode at bit 0 (1 = 50Hz, 0 = 60Hz  )
     btfsc   reg_current_mode, bit_language
     goto    set_jap
+    bcf     reg_current_mode, bit_language
     btfsc   reg_current_mode, bit_videomode
     goto    set_pal
 
 set_ntsc
     M_set60
     M_setEN
-    M_movlf code_ntsc, reg_current_mode ; in case a non-valid mode is stored
+    bsf     reg_current_mode, bit_videomode
     goto    init_end
 
 set_pal
     M_set50
     M_setEN
-    M_movlf code_pal, reg_current_mode  ; in case a non-valid mode is stored
+    bcf     reg_current_mode, bit_videomode
     goto    init_end
 
 set_jap
     M_set60
     M_setJA
-    M_movlf code_jap, reg_current_mode  ; in case a non-valid mode is stored
+    bsf     reg_current_mode, bit_language
+    bsf     reg_current_mode, bit_videomode
 ;    goto    init_end 
 
 init_end
@@ -508,7 +493,7 @@ detect_reset_type
 ; -----------------------------------------------------------------------
 ; eeprom data
 DEEPROM	CODE
-	de	code_ntsc, 0x00
+	de	code_ntsc
 
 theend
     END
