@@ -393,7 +393,7 @@ start
     call    3FFh                    ; Get the cal value
     movwf   OSCCAL                  ; Calibrate
     M_movlf 0x0b, TRISA             ; out out in out in in
-    M_movlf 0b08, TRISC             ; out out in out out out
+    M_movlf 0x08, TRISC             ; out out in out out out
     M_movlf (1<<RST_BUTTON), IOCA   ; IOC at reset button
     M_movlf (1<<RST_BUTTON), WPUA   ; pullups at reset button
     clrf    OPTION_REG              ; global pullup enable, prescaler T0 1:2
