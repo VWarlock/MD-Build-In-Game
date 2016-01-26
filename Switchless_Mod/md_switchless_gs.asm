@@ -85,12 +85,6 @@ M_movff macro   fromReg, toReg  ; move filereg to filereg
         movwf   toReg
         endm
 
-M_movpf macro   fromPORT, toReg ; move PORTx to filereg
-        movfw   fromPORT
-        andlw   0x3f
-        movwf   toReg
-        endm
-
 M_movlf macro   literal, toReg  ; move literal to filereg
         movlw   literal
         movwf   toReg
@@ -101,28 +95,6 @@ M_beff  macro   compReg1, compReg2, branch  ; branch if two fileregs are equal
         xorwf	compReg2, w
         btfsc   STATUS, Z
         goto    branch
-        endm
-
-M_bepf  macro   compPORT, compReg, branch   ; brach if PORTx equals compReg (ignoring bit 6 and 7)
-        movfw   compPORT
-        xorwf   compReg, w
-        andlw   0x3f
-        btfsc   STATUS, Z
-        goto    branch
-        endm
-
-M_belf  macro   literal, compReg, branch  ; branch if a literal is stored in filereg
-        movlw   literal
-        xorwf	compReg, w
-        btfsc   STATUS, Z
-        goto    branch
-        endm
-
-M_celf  macro   literal, compReg, call_func  ; call if a literal is stored in filereg
-        movlw   literal
-        xorwf	compReg, w
-        btfsc   STATUS, Z
-        call    call_func
         endm
 
 M_delay_x10ms   macro   literal ; delay about literal x 10ms
