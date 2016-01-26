@@ -430,20 +430,20 @@ set_initial_mode
 set_ntsc
     M_set60
     M_setEN
-    bsf     reg_current_mode, bit_videomode
+    bcf     reg_current_mode, bit_videomode
     goto    init_end
 
 set_pal
     M_set50
     M_setEN
-    bcf     reg_current_mode, bit_videomode
+    bsf     reg_current_mode, bit_videomode
     goto    init_end
 
 set_jap
     M_set60
     M_setJA
     bsf     reg_current_mode, bit_language
-    bsf     reg_current_mode, bit_videomode
+    bcf     reg_current_mode, bit_videomode
 ;    goto    init_end 
 
 init_end
