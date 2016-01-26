@@ -90,6 +90,12 @@ M_movlf macro   literal, toReg  ; move literal to filereg
         movwf   toReg
         endm
 
+M_movpf macro   fromPort, toReg
+        movfw   fromPort
+        andlw   0x3F
+        movwf   toReg
+        endm
+
 M_beff  macro   compReg1, compReg2, branch  ; branch if two fileregs are equal
         movfw   compReg1
         xorwf	compReg2, w
@@ -173,7 +179,8 @@ reg_overflow_cnt    EQU 0x20
 reg_repetition_cnt  EQU 0x21
 reg_current_mode    EQU 0x30
 reg_previous_mode   EQU 0x31
-reg_reset_panalty   EQU 0x32
+reg_mode_change_cnt EQU 0x32
+reg_reset_panalty   EQU 0x33
 reg_reset_type      EQU 0x40
 reg_led_buffer      EQU 0x41
 reg_first_boot_done EQU 0x42
@@ -198,7 +205,7 @@ code_led_invert EQU code_led_green ^ code_led_red
 delay_10ms_t0_overflows EQU 0x14    ; prescaler T0 set to 1:2 @ 4MHz
 repetitions_100ms       EQU 0x0a
 repetitions_200ms       EQU 0x14
-repetitions_300ms       EQU 0x1e
+repetitions_260ms       EQU 0x1a
 repetitions_mode_delay  EQU 0x4a    ; around 740ms
 
 ; -----------------------------------------------------------------------
@@ -224,7 +231,7 @@ check_rst
     call    delay_10ms                      ; software debounce
     M_skipnext_rst_pressed
     goto    idle
-
+    call    flash_led
     M_movlf repetitions_mode_delay, reg_repetition_cnt
 
 check_rst_loop
@@ -277,7 +284,7 @@ apply_mode ; save mode, set video mode and check if a reset is wanted
 
 doreset
     M_push_reset
-    M_delay_x10ms   repetitions_300ms
+    M_delay_x10ms   repetitions_260ms
     movlw   0x10
     btfss   reg_reset_panalty, 0  ; mode has been changed?
     addwf   reg_current_mode, 1   ; only if no: increase counter
@@ -332,6 +339,22 @@ setled_orange
     btfsc   PORTC, LED_TYPE ; if common anode:
     xorlw   code_led_invert ; invert output
     movwf   PORTC
+    return
+
+setled_off
+    movfw   PORTC
+    andlw   0x0f
+    xorlw   code_led_off
+    btfsc   PORTC, LED_TYPE ; if common anode:
+    xorlw   code_led_invert ; invert output
+    movwf   PORTC
+    return
+
+flash_led
+    M_movpf PORTC, reg_led_buffer
+    call    setled_off
+    M_delay_x10ms   repetitions_260ms
+    M_movff reg_led_buffer, PORTC
     return
 
 
