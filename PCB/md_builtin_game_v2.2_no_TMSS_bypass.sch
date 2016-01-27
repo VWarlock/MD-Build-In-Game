@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE eagle SYSTEM "eagle.dtd">
-<eagle version="7.4.0">
+<eagle version="7.5.0">
 <drawing>
 <settings>
 <setting alwaysvectorfont="yes"/>
@@ -63,6 +63,7 @@
 <layer number="53" name="tGND_GNDA" color="7" fill="9" visible="no" active="no"/>
 <layer number="54" name="bGND_GNDA" color="1" fill="9" visible="no" active="no"/>
 <layer number="56" name="wert" color="7" fill="1" visible="no" active="no"/>
+<layer number="90" name="Modules" color="5" fill="1" visible="yes" active="yes"/>
 <layer number="91" name="Nets" color="2" fill="1" visible="yes" active="yes"/>
 <layer number="92" name="Busses" color="1" fill="1" visible="yes" active="yes"/>
 <layer number="93" name="Pins" color="2" fill="1" visible="no" active="yes"/>
@@ -172,10 +173,6 @@
 </library>
 <library name="arcadetv">
 <packages>
-<package name="PADS">
-<smd name="P$1" x="0" y="0" dx="3.81" dy="1.9304" layer="1" rot="R270"/>
-<text x="-1.27" y="-1.905" size="1.016" layer="27" font="vector" ratio="22" rot="R90">&gt;Value</text>
-</package>
 <package name="MEGADRIVE_EDGE_CONNECTOR">
 <pad name="B1" x="39.37" y="-2.54" drill="1.1" shape="offset" rot="R270"/>
 <pad name="B2" x="36.83" y="-2.54" drill="1.1" shape="offset" rot="R270"/>
@@ -1424,12 +1421,6 @@
 </package>
 </packages>
 <symbols>
-<symbol name="PADS">
-<pin name="P$1" x="-2.54" y="0" visible="off" length="middle"/>
-<wire x1="1.27" y1="1.27" x2="3.81" y2="-1.27" width="0.254" layer="94"/>
-<wire x1="1.27" y1="-1.27" x2="3.81" y2="1.27" width="0.254" layer="94"/>
-<text x="-2.54" y="-5.08" size="1.778" layer="96">&gt;Value</text>
-</symbol>
 <symbol name="MEGADRIVE_EDGE_CONNECTOR">
 <pin name="B1" x="-40.64" y="-7.62" visible="pad" length="middle" rot="R90"/>
 <pin name="B2" x="-38.1" y="-7.62" visible="pad" length="middle" rot="R90"/>
@@ -2625,21 +2616,6 @@
 </symbol>
 </symbols>
 <devicesets>
-<deviceset name="PAD">
-<gates>
-<gate name="G$1" symbol="PADS" x="0" y="0"/>
-</gates>
-<devices>
-<device name="" package="PADS">
-<connects>
-<connect gate="G$1" pin="P$1" pad="P$1"/>
-</connects>
-<technologies>
-<technology name=""/>
-</technologies>
-</device>
-</devices>
-</deviceset>
 <deviceset name="MEGADRIVE_EDGE_CONNECTOR">
 <gates>
 <gate name="G$1" symbol="MEGADRIVE_EDGE_CONNECTOR" x="0" y="0"/>
@@ -10862,6 +10838,41 @@ Source: http://products.nichicon.co.jp/en/pdf/XJA043/e-ud.pdf</description>
 </deviceset>
 </devicesets>
 </library>
+<library name="snes_div">
+<packages>
+<package name="PADS">
+<smd name="P$1" x="0" y="0" dx="3.81" dy="1.9304" layer="1" rot="R270"/>
+<text x="-1.27" y="-1.905" size="1.27" layer="21" rot="R90">&gt;Name</text>
+<text x="2.54" y="-1.905" size="1.27" layer="27" rot="R90">&gt;Value</text>
+</package>
+</packages>
+<symbols>
+<symbol name="PADS">
+<pin name="P$1" x="-2.54" y="0" length="middle"/>
+<wire x1="1.27" y1="1.27" x2="3.81" y2="-1.27" width="0.254" layer="94"/>
+<wire x1="1.27" y1="-1.27" x2="3.81" y2="1.27" width="0.254" layer="94"/>
+<text x="-2.54" y="2.54" size="1.778" layer="95">&gt;Name</text>
+<text x="-2.54" y="-5.08" size="1.778" layer="96">&gt;Value</text>
+</symbol>
+</symbols>
+<devicesets>
+<deviceset name="PAD">
+<gates>
+<gate name="G$1" symbol="PADS" x="0" y="0"/>
+</gates>
+<devices>
+<device name="" package="PADS">
+<connects>
+<connect gate="G$1" pin="P$1" pad="P$1"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+</devices>
+</deviceset>
+</devicesets>
+</library>
 </libraries>
 <attributes>
 </attributes>
@@ -10874,28 +10885,24 @@ Source: http://products.nichicon.co.jp/en/pdf/XJA043/e-ud.pdf</description>
 <parts>
 <part name="P+1" library="supply1" deviceset="+5V" device=""/>
 <part name="GND1" library="supply1" deviceset="GND" device=""/>
-<part name="U$3" library="arcadetv" deviceset="PAD" device="" value="/CART_K"/>
-<part name="U$4" library="arcadetv" deviceset="PAD" device="" value="/DISK (ExpPort B2)"/>
 <part name="U$6" library="arcadetv" deviceset="MEGADRIVE_EDGE_CONNECTOR" device=""/>
 <part name="IC1" library="arcadetv" deviceset="MX29F1610A" device=""/>
+<part name="C2" library="arcadetv" deviceset="C0805" device="" value="100nF"/>
 <part name="C3" library="arcadetv" deviceset="C0805" device="" value="100nF"/>
-<part name="C4" library="arcadetv" deviceset="C0805" device="" value="100nF"/>
 <part name="U$1" library="arcadetv" deviceset="LOGO_SONIC_20MM" device=""/>
 <part name="IC2" library="atmel" deviceset="ATF16V8B" device="S"/>
 <part name="P+6" library="supply1" deviceset="+5V" device=""/>
 <part name="GND3" library="supply1" deviceset="GND" device=""/>
-<part name="U$2" library="arcadetv" deviceset="PAD" device="" value="/CS_K"/>
 <part name="SJ1" library="jumper" deviceset="SJ" device=""/>
 <part name="SJ2" library="jumper" deviceset="SJ" device=""/>
-<part name="SJ3" library="jumper" deviceset="SJ" device=""/>
 <part name="GND2" library="supply1" deviceset="GND" device=""/>
 <part name="GND4" library="supply1" deviceset="GND" device=""/>
-<part name="U$5" library="arcadetv" deviceset="PAD" device="" value="BIG_Sel0"/>
-<part name="U$7" library="arcadetv" deviceset="PAD" device="" value="BIG_Sel_1"/>
-<part name="C1" library="rcl" deviceset="CPOL-EU" device="SMCB" value="22uF/6.3V"/>
-<part name="C2" library="rcl" deviceset="CPOL-EU" device="SMCB" value="22uF"/>
-<part name="C5" library="arcadetv" deviceset="C0805" device="" value="100nF"/>
-<part name="SJ4" library="jumper" deviceset="SJ" device=""/>
+<part name="C1" library="rcl" deviceset="CPOL-EU" device="SMCC" value="22uF"/>
+<part name="C4" library="arcadetv" deviceset="C0805" device="" value="100nF"/>
+<part name="/DISK" library="snes_div" deviceset="PAD" device=""/>
+<part name="/CART" library="snes_div" deviceset="PAD" device=""/>
+<part name="GS1" library="snes_div" deviceset="PAD" device=""/>
+<part name="GS0" library="snes_div" deviceset="PAD" device=""/>
 </parts>
 <sheets>
 <sheet>
@@ -10906,7 +10913,7 @@ This will devide the signal /CART into:
 /CART_M
 -&gt; towards CartSlot
 
-/CART_K
+/CART_C
 -&gt; towards IC4</text>
 <text x="-7.62" y="76.2" size="3.81" layer="94">Mega Drive Built-In-Game
 srdwa, borti4938, arcadeTv</text>
@@ -10914,63 +10921,39 @@ srdwa, borti4938, arcadeTv</text>
 <wire x1="200.66" y1="88.9" x2="200.66" y2="-81.28" width="0.1524" layer="94"/>
 <wire x1="200.66" y1="-81.28" x2="-12.7" y2="-81.28" width="0.1524" layer="94"/>
 <wire x1="-12.7" y1="-81.28" x2="-12.7" y2="88.9" width="0.1524" layer="94"/>
-<text x="-10.16" y="-76.2" size="1.778" layer="94">Add bypass-capacitors to all 3 ICs: 100nF
-Also a polarized cap (47uF) and a 22nF ceramic cap between +5V and GND on the supply-inputs.</text>
 <text x="165.1" y="81.28" size="3.81" layer="94" align="bottom-center">CartSlot</text>
 <text x="-5.08" y="38.1" size="3.81" layer="94">www.circuit-board.de</text>
-<text x="125.222" y="-4.572" size="1.778" layer="94">/CART_M
--&gt; towards CartSlot</text>
-<text x="102.362" y="3.048" size="1.778" layer="94">TST2 same as /DISK???</text>
 </plain>
 <instances>
 <instance part="P+1" gate="1" x="-5.08" y="-10.16"/>
-<instance part="GND1" gate="1" x="15.24" y="-60.96"/>
-<instance part="U$3" gate="G$1" x="-2.54" y="2.54" smashed="yes" rot="R180">
-<attribute name="VALUE" x="-7.366" y="4.572" size="1.778" layer="96"/>
-</instance>
-<instance part="U$4" gate="G$1" x="-2.54" y="10.16" smashed="yes" rot="R180">
-<attribute name="VALUE" x="-7.366" y="12.192" size="1.778" layer="96"/>
-</instance>
+<instance part="GND1" gate="1" x="15.24" y="-66.04"/>
 <instance part="U$6" gate="G$1" x="165.1" y="35.56" rot="R270"/>
 <instance part="IC1" gate="G$1" x="165.1" y="-40.64"/>
-<instance part="C3" gate="G$1" x="7.62" y="-33.02" rot="R270"/>
-<instance part="C4" gate="G$1" x="7.62" y="-43.18" rot="R270"/>
+<instance part="C2" gate="G$1" x="7.62" y="-33.02" rot="R270"/>
+<instance part="C3" gate="G$1" x="7.62" y="-43.18" rot="R270"/>
 <instance part="U$1" gate="G$1" x="58.42" y="73.66"/>
 <instance part="IC2" gate="G$1" x="76.2" y="-38.1"/>
 <instance part="P+6" gate="1" x="63.5" y="-15.24"/>
 <instance part="GND3" gate="1" x="63.5" y="-58.42"/>
-<instance part="U$2" gate="G$1" x="-2.54" y="-5.08" smashed="yes" rot="R180">
-<attribute name="VALUE" x="-7.366" y="-3.048" size="1.778" layer="96"/>
-</instance>
 <instance part="SJ1" gate="1" x="48.26" y="-30.48"/>
 <instance part="SJ2" gate="1" x="48.26" y="-33.02"/>
-<instance part="SJ3" gate="1" x="104.14" y="-25.4"/>
 <instance part="GND2" gate="1" x="43.18" y="-38.1"/>
-<instance part="GND4" gate="1" x="109.22" y="-30.48"/>
-<instance part="U$5" gate="G$1" x="30.48" y="10.16" smashed="yes" rot="R180">
-<attribute name="VALUE" x="25.654" y="12.192" size="1.778" layer="96"/>
-</instance>
-<instance part="U$7" gate="G$1" x="30.48" y="2.54" smashed="yes" rot="R180">
-<attribute name="VALUE" x="25.654" y="4.572" size="1.778" layer="96"/>
-</instance>
-<instance part="C1" gate="G$1" x="5.08" y="-17.78" rot="R90"/>
-<instance part="C2" gate="G$1" x="5.08" y="-25.4" rot="R90"/>
-<instance part="C5" gate="G$1" x="7.62" y="-53.34" rot="R270"/>
-<instance part="SJ4" gate="1" x="91.44" y="-43.18"/>
+<instance part="GND4" gate="1" x="106.68" y="-27.94"/>
+<instance part="C1" gate="G$1" x="5.08" y="-25.4" rot="R90"/>
+<instance part="C4" gate="G$1" x="7.62" y="-53.34" rot="R270"/>
+<instance part="/DISK" gate="G$1" x="-2.54" y="10.16" rot="R180"/>
+<instance part="/CART" gate="G$1" x="-2.54" y="2.54" rot="R180"/>
+<instance part="GS1" gate="G$1" x="30.48" y="2.54" rot="R180"/>
+<instance part="GS0" gate="G$1" x="30.48" y="10.16" rot="R180"/>
 </instances>
 <busses>
 </busses>
 <nets>
-<net name="+5V" class="0">
+<net name="VCC" class="0">
 <segment>
 <pinref part="U$6" gate="G$1" pin="A2"/>
 <wire x1="193.04" y1="73.66" x2="172.72" y2="73.66" width="0.1524" layer="91"/>
 <label x="193.04" y="73.66" size="1.778" layer="95" rot="MR0"/>
-</segment>
-<segment>
-<pinref part="U$6" gate="G$1" pin="A31"/>
-<wire x1="172.72" y1="0" x2="193.04" y2="0" width="0.1524" layer="91"/>
-<label x="193.04" y="0" size="1.778" layer="95" rot="MR0"/>
 </segment>
 <segment>
 <pinref part="IC1" gate="G$1" pin="VCC"/>
@@ -10987,23 +10970,19 @@ Also a polarized cap (47uF) and a 22nF ceramic cap between +5V and GND on the su
 <label x="193.04" y="-10.16" size="1.778" layer="95" rot="MR0"/>
 </segment>
 <segment>
-<wire x1="-5.08" y1="-12.7" x2="-5.08" y2="-17.78" width="0.1524" layer="91"/>
-<wire x1="-5.08" y1="-17.78" x2="2.54" y2="-17.78" width="0.1524" layer="91"/>
-<pinref part="C3" gate="G$1" pin="2"/>
-<wire x1="-5.08" y1="-17.78" x2="-5.08" y2="-25.4" width="0.1524" layer="91"/>
+<pinref part="C2" gate="G$1" pin="2"/>
+<wire x1="-5.08" y1="-12.7" x2="-5.08" y2="-25.4" width="0.1524" layer="91"/>
 <wire x1="-5.08" y1="-25.4" x2="-5.08" y2="-33.02" width="0.1524" layer="91"/>
 <wire x1="-5.08" y1="-33.02" x2="2.54" y2="-33.02" width="0.1524" layer="91"/>
-<junction x="-5.08" y="-17.78"/>
-<pinref part="C4" gate="G$1" pin="2"/>
+<pinref part="C3" gate="G$1" pin="2"/>
 <wire x1="-5.08" y1="-33.02" x2="-5.08" y2="-43.18" width="0.1524" layer="91"/>
 <wire x1="-5.08" y1="-43.18" x2="2.54" y2="-43.18" width="0.1524" layer="91"/>
 <junction x="-5.08" y="-33.02"/>
 <pinref part="P+1" gate="1" pin="+5V"/>
 <pinref part="C1" gate="G$1" pin="+"/>
-<pinref part="C2" gate="G$1" pin="+"/>
 <wire x1="2.54" y1="-25.4" x2="-5.08" y2="-25.4" width="0.1524" layer="91"/>
 <junction x="-5.08" y="-25.4"/>
-<pinref part="C5" gate="G$1" pin="2"/>
+<pinref part="C4" gate="G$1" pin="2"/>
 <wire x1="2.54" y1="-53.34" x2="-5.08" y2="-53.34" width="0.1524" layer="91"/>
 <wire x1="-5.08" y1="-53.34" x2="-5.08" y2="-43.18" width="0.1524" layer="91"/>
 <junction x="-5.08" y="-43.18"/>
@@ -11018,23 +10997,19 @@ Also a polarized cap (47uF) and a 22nF ceramic cap between +5V and GND on the su
 <net name="GND" class="0">
 <segment>
 <pinref part="GND1" gate="1" pin="GND"/>
-<wire x1="15.24" y1="-17.78" x2="15.24" y2="-25.4" width="0.1524" layer="91"/>
 <wire x1="15.24" y1="-25.4" x2="15.24" y2="-33.02" width="0.1524" layer="91"/>
 <wire x1="15.24" y1="-33.02" x2="15.24" y2="-43.18" width="0.1524" layer="91"/>
 <wire x1="15.24" y1="-43.18" x2="15.24" y2="-53.34" width="0.1524" layer="91"/>
-<wire x1="15.24" y1="-53.34" x2="15.24" y2="-58.42" width="0.1524" layer="91"/>
-<wire x1="10.16" y1="-17.78" x2="15.24" y2="-17.78" width="0.1524" layer="91"/>
-<pinref part="C3" gate="G$1" pin="1"/>
+<wire x1="15.24" y1="-53.34" x2="15.24" y2="-63.5" width="0.1524" layer="91"/>
+<pinref part="C2" gate="G$1" pin="1"/>
 <wire x1="10.16" y1="-33.02" x2="15.24" y2="-33.02" width="0.1524" layer="91"/>
 <junction x="15.24" y="-33.02"/>
-<pinref part="C4" gate="G$1" pin="1"/>
+<pinref part="C3" gate="G$1" pin="1"/>
 <wire x1="10.16" y1="-43.18" x2="15.24" y2="-43.18" width="0.1524" layer="91"/>
 <junction x="15.24" y="-43.18"/>
 <pinref part="C1" gate="G$1" pin="-"/>
-<pinref part="C2" gate="G$1" pin="-"/>
 <wire x1="10.16" y1="-25.4" x2="15.24" y2="-25.4" width="0.1524" layer="91"/>
-<junction x="15.24" y="-25.4"/>
-<pinref part="C5" gate="G$1" pin="1"/>
+<pinref part="C4" gate="G$1" pin="1"/>
 <wire x1="10.16" y1="-53.34" x2="15.24" y2="-53.34" width="0.1524" layer="91"/>
 <junction x="15.24" y="-53.34"/>
 </segment>
@@ -11082,9 +11057,10 @@ Also a polarized cap (47uF) and a 22nF ceramic cap between +5V and GND on the su
 <junction x="43.18" y="-33.02"/>
 </segment>
 <segment>
+<pinref part="IC2" gate="G$1" pin="OE"/>
+<wire x1="86.36" y1="-25.4" x2="106.68" y2="-25.4" width="0.1524" layer="91"/>
+<label x="88.9" y="-25.4" size="1.778" layer="95"/>
 <pinref part="GND4" gate="1" pin="GND"/>
-<pinref part="SJ3" gate="1" pin="2"/>
-<wire x1="109.22" y1="-27.94" x2="109.22" y2="-25.4" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="D15" class="0">
@@ -11495,7 +11471,7 @@ Also a polarized cap (47uF) and a 22nF ceramic cap between +5V and GND on the su
 <label x="137.16" y="-53.34" size="1.778" layer="95"/>
 </segment>
 </net>
-<net name="/CHECK" class="0">
+<net name="CART_/CART" class="0">
 <segment>
 <pinref part="U$6" gate="G$1" pin="B32"/>
 <label x="137.16" y="-2.54" size="1.778" layer="95"/>
@@ -11678,9 +11654,9 @@ Also a polarized cap (47uF) and a 22nF ceramic cap between +5V and GND on the su
 </net>
 <net name="ASIC_/CART" class="0">
 <segment>
-<pinref part="U$3" gate="G$1" pin="P$1"/>
-<wire x1="0" y1="2.54" x2="12.7" y2="2.54" width="0.1524" layer="91"/>
 <label x="2.54" y="2.54" size="1.778" layer="95"/>
+<pinref part="/CART" gate="G$1" pin="P$1"/>
+<wire x1="0" y1="2.54" x2="12.7" y2="2.54" width="0.1524" layer="91"/>
 </segment>
 <segment>
 <pinref part="IC2" gate="G$1" pin="O3"/>
@@ -11690,14 +11666,14 @@ Also a polarized cap (47uF) and a 22nF ceramic cap between +5V and GND on the su
 </net>
 <net name="/DISK" class="0">
 <segment>
+<label x="2.54" y="10.16" size="1.778" layer="95"/>
+<pinref part="/DISK" gate="G$1" pin="P$1"/>
+<wire x1="0" y1="10.16" x2="12.7" y2="10.16" width="0.1524" layer="91"/>
+</segment>
+<segment>
 <pinref part="IC2" gate="G$1" pin="CLK"/>
 <wire x1="66.04" y1="-25.4" x2="53.34" y2="-25.4" width="0.1524" layer="91"/>
 <label x="53.34" y="-25.4" size="1.778" layer="95"/>
-</segment>
-<segment>
-<wire x1="0" y1="10.16" x2="12.7" y2="10.16" width="0.1524" layer="91"/>
-<pinref part="U$4" gate="G$1" pin="P$1"/>
-<label x="2.54" y="10.16" size="1.778" layer="95"/>
 </segment>
 </net>
 <net name="MODE2" class="0">
@@ -11716,26 +11692,6 @@ Also a polarized cap (47uF) and a 22nF ceramic cap between +5V and GND on the su
 <pinref part="SJ2" gate="1" pin="2"/>
 </segment>
 </net>
-<net name="ASIC_/CS" class="0">
-<segment>
-<label x="53.34" y="-38.1" size="1.778" layer="95"/>
-<pinref part="IC2" gate="G$1" pin="I4"/>
-<wire x1="66.04" y1="-38.1" x2="53.34" y2="-38.1" width="0.1524" layer="91"/>
-</segment>
-<segment>
-<pinref part="U$2" gate="G$1" pin="P$1"/>
-<wire x1="0" y1="-5.08" x2="12.7" y2="-5.08" width="0.1524" layer="91"/>
-<label x="2.54" y="-5.08" size="1.778" layer="95"/>
-</segment>
-</net>
-<net name="TMSS_MOD" class="0">
-<segment>
-<pinref part="IC2" gate="G$1" pin="OE"/>
-<wire x1="86.36" y1="-25.4" x2="99.06" y2="-25.4" width="0.1524" layer="91"/>
-<label x="88.9" y="-25.4" size="1.778" layer="95"/>
-<pinref part="SJ3" gate="1" pin="1"/>
-</segment>
-</net>
 <net name="BIG_SEL0" class="0">
 <segment>
 <pinref part="IC2" gate="G$1" pin="O1"/>
@@ -11743,10 +11699,9 @@ Also a polarized cap (47uF) and a 22nF ceramic cap between +5V and GND on the su
 <label x="88.9" y="-30.48" size="1.778" layer="95"/>
 </segment>
 <segment>
-<wire x1="35.56" y1="10.16" x2="45.72" y2="10.16" width="0.1524" layer="91"/>
-<pinref part="U$5" gate="G$1" pin="P$1"/>
-<wire x1="35.56" y1="10.16" x2="33.02" y2="10.16" width="0.1524" layer="91"/>
 <label x="35.56" y="10.16" size="1.778" layer="95"/>
+<pinref part="GS0" gate="G$1" pin="P$1"/>
+<wire x1="33.02" y1="10.16" x2="45.72" y2="10.16" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="BIG_SEL1" class="0">
@@ -11756,9 +11711,9 @@ Also a polarized cap (47uF) and a 22nF ceramic cap between +5V and GND on the su
 <label x="88.9" y="-33.02" size="1.778" layer="95"/>
 </segment>
 <segment>
-<pinref part="U$7" gate="G$1" pin="P$1"/>
-<wire x1="33.02" y1="2.54" x2="45.72" y2="2.54" width="0.1524" layer="91"/>
 <label x="35.56" y="2.54" size="1.778" layer="95"/>
+<pinref part="GS1" gate="G$1" pin="P$1"/>
+<wire x1="33.02" y1="2.54" x2="45.72" y2="2.54" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="/CE" class="0">
@@ -11825,22 +11780,22 @@ Also a polarized cap (47uF) and a 22nF ceramic cap between +5V and GND on the su
 <wire x1="99.06" y1="-45.72" x2="86.36" y2="-45.72" width="0.1524" layer="91"/>
 </segment>
 </net>
-<net name="CART_/CS" class="0">
+<net name="CART_/OE" class="0">
 <segment>
 <pinref part="U$6" gate="G$1" pin="B17"/>
 <wire x1="157.48" y1="35.56" x2="137.16" y2="35.56" width="0.1524" layer="91"/>
 <label x="137.16" y="35.56" size="1.778" layer="95"/>
 </segment>
 <segment>
-<label x="99.06" y="-43.18" size="1.778" layer="95"/>
-<pinref part="SJ4" gate="1" pin="2"/>
-<wire x1="96.52" y1="-43.18" x2="111.76" y2="-43.18" width="0.1524" layer="91"/>
+<label x="53.34" y="-38.1" size="1.778" layer="95"/>
+<pinref part="IC2" gate="G$1" pin="I4"/>
+<wire x1="66.04" y1="-38.1" x2="53.34" y2="-38.1" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="N$1" class="0">
 <segment>
 <pinref part="IC2" gate="G$1" pin="O6"/>
-<pinref part="SJ4" gate="1" pin="1"/>
+<wire x1="99.06" y1="-43.18" x2="86.36" y2="-43.18" width="0.1524" layer="91"/>
 </segment>
 </net>
 </nets>
