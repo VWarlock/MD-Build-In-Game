@@ -39,7 +39,7 @@
 ;   Pin 3 and Pin 2
 ;     A two bit counter which increases with each reset except after a reset if the
 ;     mode has been previously changed.
-;     MSB is pin 2 and LSB is pin 3. These two pins can be used for the MD build-in
+;     MSB is pin 2 and LSB is pin 3. These two pins can be used for the MD build-in-
 ;     game pcb.
 ;
 ;   Pin 4 (RoMC = reset on mode change)
@@ -179,8 +179,8 @@ reg_overflow_cnt    EQU 0x20
 reg_repetition_cnt  EQU 0x21
 reg_current_mode    EQU 0x30
 reg_previous_mode   EQU 0x31
-reg_mode_change_cnt EQU 0x32
-reg_reset_panalty   EQU 0x33
+reg_mode_buffer     EQU 0x32
+reg_mode_loop_cnt   EQU 0x33
 reg_reset_type      EQU 0x40
 reg_led_buffer      EQU 0x41
 reg_first_boot_done EQU 0x42
@@ -190,10 +190,12 @@ code_ntsc           EQU 0x00
 code_pal            EQU 0x01
 code_jap            EQU 0x02
 
-mode_overflow       EQU 0x03
 bit_language        EQU 1
 bit_videomode       EQU 0
 
+mode_loop_cnt   EQU 0x0c  ; should be a multiple of 3
+                          ; here: cycle four times through the mode change loop
+                          ;       before changing the ingame counter
 
 code_led_off    EQU 0x00
 code_led_green  EQU (1<<LED_GREEN)
@@ -202,11 +204,12 @@ code_led_orange EQU code_led_green ^ code_led_red
 
 code_led_invert EQU code_led_green ^ code_led_red
 
-delay_10ms_t0_overflows EQU 0x14    ; prescaler T0 set to 1:2 @ 4MHz
-repetitions_100ms       EQU 0x0a
-repetitions_200ms       EQU 0x14
-repetitions_260ms       EQU 0x1a
-repetitions_mode_delay  EQU 0x4a    ; around 740ms
+delay_10ms_t0_overflows   EQU 0x14    ; prescaler T0 set to 1:2 @ 4MHz
+repetitions_100ms         EQU 0x0a
+repetitions_200ms         EQU 0x14
+repetitions_260ms         EQU 0x1a
+repetitions_big_chg_delay EQU 0x34    ; around 520ms
+repetitions_mode_delay    EQU 0x4a    ; around 740ms
 
 ; -----------------------------------------------------------------------
 
@@ -240,7 +243,11 @@ check_rst_loop
     goto    doreset
     decfsz  reg_repetition_cnt, 1
     goto    check_rst_loop
-    
+
+    M_movff reg_current_mode, reg_mode_buffer
+    M_movpf PORTC, reg_led_buffer
+    M_movlf mode_loop_cnt, reg_mode_loop_cnt
+
 next_mode
     btfsc   reg_current_mode, bit_language
     goto    next_mode_00
@@ -260,11 +267,32 @@ mode_delay_loop
     goto    apply_mode
     decfsz  reg_repetition_cnt, 1
     goto    mode_delay_loop
+
+    decfsz  reg_mode_loop_cnt, 1
     goto    next_mode
+
+    M_movff reg_mode_buffer, reg_current_mode ; just to be sure in case the mode loop
+                                              ; doesn't end with the entered mode
+    call  setled_off
+
+next_big_loop ; change build-in-game loop
+    M_delay_x10ms   repetitions_big_chg_delay
+    M_skipnext_rst_pressed
+    goto  next_big_loop_end ; exit this loop if the reset button has been released
+
+    movlw   0x10
+    addwf   reg_current_mode, 1   ; increase counter
+    bcf     reg_current_mode, 6   ; keep the 2bit counter 2bits long
+    call    show_big_code
+    goto    next_big_loop
+
+next_big_loop_end ; change back to the initial LED color
+    M_movff reg_led_buffer, PORTC
+    call  save_mode
+    goto  idle
 
 
 apply_mode ; save mode, set video mode and check if a reset is wanted
-    clrf    reg_reset_panalty                         ; before doing anything unset panalty of reset counter
     call    save_mode
     btfsc   reg_current_mode, bit_videomode
     bcf     PORTC, VIDMODE                  ; 50Hz
@@ -276,7 +304,6 @@ apply_mode ; save mode, set video mode and check if a reset is wanted
     andlw   0x03
     btfsc   STATUS, Z
     goto    idle                    ; nothing has been changed -> return to idle
-    bsf     reg_reset_panalty, 0    ; set panalty flag
     btfss   PORTA, NRoMC            ; auto-reset on mode change?
     goto    idle                    ; no: go back to idle
                                     ; yes: perform a reset
@@ -285,12 +312,7 @@ apply_mode ; save mode, set video mode and check if a reset is wanted
 doreset
     M_push_reset
     M_delay_x10ms   repetitions_260ms
-    movlw   0x10
-    btfss   reg_reset_panalty, 0  ; mode has been changed?
-    addwf   reg_current_mode, 1   ; only if no: increase counter
-    bcf     reg_current_mode, 6   ; keep the 2bit counter 2bits long
-    clrf    reg_reset_panalty     ; unset a potential panalty
-    goto    set_BIG_Sel           ; small trick ;)
+    goto    set_initial_mode           ; small trick ;)
 
 
 set_previous_mode
@@ -355,6 +377,22 @@ flash_led
     call    setled_off
     M_delay_x10ms   repetitions_260ms
     M_movff reg_led_buffer, PORTC
+    return
+
+show_big_code
+    btfss   reg_current_mode, 5
+    call    setled_green
+    btfsc   reg_current_mode, 5
+    call    setled_red
+    M_delay_x10ms   repetitions_260ms
+    call    setled_off
+    M_delay_x10ms   repetitions_260ms
+    btfss   reg_current_mode, 4
+    call    setled_green
+    btfsc   reg_current_mode, 4
+    call    setled_red
+    M_delay_x10ms   repetitions_260ms
+    call    setled_off
     return
 
 
