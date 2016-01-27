@@ -42,7 +42,7 @@
 ;     MSB is pin 2 and LSB is pin 3. These two pins can be used for the MD build-in-
 ;     game pcb.
 ;
-;   Pin 4 (RoMC = reset on mode change)
+;   Pin 4 (/RoMC = reset on mode change, neg. logic)
 ;      low = RoMC on   - PIC resets console if mode has been changed
 ;     high = RoMC off  - in this case only the bit at pin 9 (Videomode) is changed
 ;                        (the bit at pin 8 is unchanged until a reset to not change the
@@ -304,7 +304,7 @@ apply_mode ; save mode, set video mode and check if a reset is wanted
     andlw   0x03
     btfsc   STATUS, Z
     goto    idle                    ; nothing has been changed -> return to idle
-    btfss   PORTA, NRoMC            ; auto-reset on mode change?
+    btfsc   PORTA, NRoMC            ; auto-reset on mode change?
     goto    idle                    ; no: go back to idle
                                     ; yes: perform a reset
 
