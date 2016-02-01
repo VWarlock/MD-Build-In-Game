@@ -182,8 +182,7 @@ reg_previous_mode   EQU 0x31
 reg_mode_buffer     EQU 0x32
 reg_mode_loop_cnt   EQU 0x33
 reg_reset_type      EQU 0x40
-reg_led_buffer      EQU 0x41
-reg_first_boot_done EQU 0x42
+reg_first_boot_done EQU 0x41
 
 ; codes and bits
 code_ntsc           EQU 0x00
@@ -234,7 +233,7 @@ check_rst
     call    delay_10ms                      ; software debounce
     M_skipnext_rst_pressed
     goto    idle
-    call    flash_led
+    call    setled_off
     M_movlf repetitions_mode_delay, reg_repetition_cnt
 
 check_rst_loop
@@ -245,7 +244,6 @@ check_rst_loop
     goto    check_rst_loop
 
     M_movff reg_current_mode, reg_mode_buffer
-    M_movpf PORTC, reg_led_buffer
     M_movlf mode_loop_cnt, reg_mode_loop_cnt
 
 next_mode
@@ -286,9 +284,9 @@ next_big_loop ; change build-in-game loop
     call    show_big_code
     goto    next_big_loop
 
-next_big_loop_end ; change back to the initial LED color
-    M_movff reg_led_buffer, PORTC
+next_big_loop_end
     call  save_mode
+    call  setled    ; change back to the initial LED color
     goto  idle
 
 
@@ -298,6 +296,7 @@ apply_mode ; save mode, set video mode and check if a reset is wanted
     bcf     PORTC, VIDMODE                  ; 50Hz
     btfss   reg_current_mode, bit_videomode
     bsf     PORTC, VIDMODE                  ; 60Hz
+    call    setled
     ; check if current mode and previous mode are the same
     movfw   reg_current_mode
     xorwf   reg_previous_mode, 0
@@ -311,6 +310,7 @@ apply_mode ; save mode, set video mode and check if a reset is wanted
 
 doreset
     M_push_reset
+    call    setled
     M_delay_x10ms   repetitions_260ms
     goto    set_initial_mode           ; small trick ;)
 
@@ -370,13 +370,6 @@ setled_off
     btfsc   PORTC, LED_TYPE ; if common anode:
     xorlw   code_led_invert ; invert output
     movwf   PORTC
-    return
-
-flash_led
-    M_movpf PORTC, reg_led_buffer
-    call    setled_off
-    M_delay_x10ms   repetitions_260ms
-    M_movff reg_led_buffer, PORTC
     return
 
 show_big_code
